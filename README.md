@@ -58,17 +58,32 @@
             output: { peak: 3, idle: 3 }
 ```
 
+## 仓库
+
+| 项 | 值 |
+|---|---|
+| 地址 | https://github.com/CKLYZZQ/DSH-plugin |
+| 可见性 | **私有** |
+| 默认分支 | `main` |
+| git spec | `git+https://github.com/CKLYZZQ/DSH-plugin.git` |
+
+**仓库根即包根**：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`pricing.js` 都在根目录，所以这个仓库本身可以直接当 git spec 安装。
+
+> ⚠️ 仓库是私有的：目标机器用 git spec 安装时，pnpm 克隆需要该机具备 GitHub 凭据。若目标机没有凭据，改用 **tarball** 或**本地目录**方式，或把仓库改为公开。
+
 ## 安装
 
-三种方式都走 Harness 的插件管理器（侧栏 Plugins 页，或 agent 的 `plugin_manager` 工具，`target` 传对应 spec）：
+四种方式都走 Harness 的插件管理器（侧栏 Plugins 页，或 agent 的 `plugin_manager` 工具，`target` 传对应 spec）：
 
 | 方式 | 做法 |
 |---|---|
-| 本地目录 | 把 `dsh-billing` 整个目录拷到目标机器，`install_bundle` 的 `target` 传该机**绝对路径** |
-| tarball（离线跨机推荐） | `pnpm pack` / `npm pack` 得到 `.tgz`，`target` 传 tarball 路径 |
+| **git 仓库** | `target` 传 `git+https://github.com/CKLYZZQ/DSH-plugin.git`（需目标机有私有仓库凭据） |
+| tarball（离线跨机推荐） | `pnpm pack` / `npm pack` 得到 `.tgz`，`target` 传 tarball 绝对路径 |
+| 本地目录 | 把 `dsh-billing` 整个目录拷到目标机器，`install_bundle` 的 `target` 传该机**绝对路径**（装出来是 `link:`，源目录不可删/移） |
 | npm / 私有 registry | 去掉 `package.json` 的 `private` 后发布，`target` 传包名（可用 `registry` 指定源） |
 
-安装默认启用该 bundle，profile 级生效、跨会话、重启后保留。新装 bundle 通常经 HMR 即时生效；**替换已安装包需要重启**以加载新的 JS 模块代。
+安装默认启用该 bundle，profile 级生效、跨会话、重启后保留。
+新装 bundle 通常经 HMR 即时生效；**替换已安装包需要重启**以加载新的 JS 模块代。
 
 卸载：侧栏 Plugins 页取消选择，或 `plugin_manager` 的 `remove_bundle`。
 

@@ -1,0 +1,28 @@
+# dsh-billing — profile patch layer.
+#
+# Every key below is optional and read by the plugin's own Host half at
+# activation (the plugin declares no Config schema, so nothing is validated
+# against a shape and unknown keys are ignored).
+#
+#   priceSourceUrl   official pricing page the Host half fetches and parses.
+#                    The bundled parser targets the Chinese page layout
+#                    (百万tokens输入/输出 + 空闲时段/高峰时段).
+#   refreshHours     how often the Host half re-fetches that page.
+#   requestTimeoutMs bound on one fetch.
+#   loopbackOnly     serve prices.json to loopback callers only.
+#   holidays         ['YYYY-MM-DD', ...] treated as idle (Asia/Shanghai).
+#   models           { "<model id>": { cacheHitInput: {peak,idle},
+#                                      cacheMissInput: {peak,idle},
+#                                      output: {peak,idle} } }
+#                    unit: currency per 1,000,000 tokens; wins over both the
+#                    fetched table and the client's bundled baseline.
+- insert:
+    - id: billing
+      name: '@local/dsh-billing'
+      config:
+        priceSourceUrl: 'https://api-docs.deepseek.com/zh-cn/quick_start/pricing/'
+        refreshHours: 12
+        requestTimeoutMs: 8000
+        loopbackOnly: true
+        holidays: []
+        models: {}

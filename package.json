@@ -1,0 +1,38 @@
+{
+  "name": "@local/dsh-billing",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Session billing pill: shows what the current session cost, using official per-model prices.",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "pricing.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "README.md"
+  ],
+  "meta": {
+    "title": "会话账单",
+    "description": "在输入框底栏显示当前会话按官方单价折算的花费，可展开逐轮明细。"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-chat"
+      ]
+    }
+  }
+}

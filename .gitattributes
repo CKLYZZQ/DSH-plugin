@@ -1,0 +1,9 @@
+# Keep the package byte-identical across machines: this plugin is installed from
+# git/pnpm on other computers, so line endings must not churn per platform.
+* text=auto eol=lf
+
+# Binaries
+*.tgz binary
+*.png binary
+*.jpg binary
+*.woff2 binary

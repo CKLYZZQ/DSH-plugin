@@ -1,0 +1,9 @@
+# Build artifacts
+*.tgz
+
+# Dependencies (this package has none, but keep the profile workspace clean)
+node_modules/
+
+# OS noise
+Thumbs.db
+.DS_Store

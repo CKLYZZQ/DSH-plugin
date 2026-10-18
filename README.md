@@ -63,13 +63,15 @@
 | 项 | 值 |
 |---|---|
 | 地址 | https://github.com/CKLYZZQ/DSH-plugin |
-| 可见性 | **私有** |
+| 可见性 | **公开** |
+| 许可 | MIT（见 [LICENSE](LICENSE)） |
 | 默认分支 | `main` |
 | git spec | `git+https://github.com/CKLYZZQ/DSH-plugin.git` |
 
 **仓库根即包根**：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`pricing.js` 都在根目录，所以这个仓库本身可以直接当 git spec 安装。
 
-> ⚠️ 仓库是私有的：目标机器用 git spec 安装时，pnpm 克隆需要该机具备 GitHub 凭据。若目标机没有凭据，改用 **tarball** 或**本地目录**方式，或把仓库改为公开。
+> 仓库公开，任何机器都能直接克隆安装，**不需要 GitHub 凭据**。
+> 注意公开是**单向门**：即使之后改回私有，已产生的 fork、GitHub 缓存与搜索引擎索引也不会消失。
 
 ## 安装
 
@@ -77,8 +79,8 @@
 
 | 方式 | 做法 |
 |---|---|
-| **git 仓库** | `target` 传 `git+https://github.com/CKLYZZQ/DSH-plugin.git`（需目标机有私有仓库凭据） |
-| tarball（离线跨机推荐） | `pnpm pack` / `npm pack` 得到 `.tgz`，`target` 传 tarball 绝对路径 |
+| **git 仓库** | `target` 传 `git+https://github.com/CKLYZZQ/DSH-plugin.git`（公开仓库，无需凭据） |
+| tarball（离线跨机） | `pnpm pack` / `npm pack` 得到 `.tgz`，`target` 传 tarball 绝对路径 |
 | 本地目录 | 把 `dsh-billing` 整个目录拷到目标机器，`install_bundle` 的 `target` 传该机**绝对路径**（装出来是 `link:`，源目录不可删/移） |
 | npm / 私有 registry | 去掉 `package.json` 的 `private` 后发布，`target` 传包名（可用 `registry` 指定源） |
 
@@ -90,9 +92,9 @@
 ## 依赖与兼容
 
 - 零 `dependencies`、零 `peerDependencies`、零 install script：不 import 任何 `@deepseek-ai/*`，因此不会触发 peer 版本拒绝，也不会产生待批准的构建脚本。
-- `dsh.client.inject` 只声明激活顺序：目标 profile 需组合 `ui-conversation`（座位 与底栏）与 `ui-chat`（逐轮数据）。缺 `ui-chat` 时降级为整会话总量估算；缺 `dsh-token-meter` 时不显示（拿不到会话总量）。
+- `dsh.client.inject` 只声明激活顺序：目标 profile 需组合 `ui-conversation`（座位与底栏）与 `ui-chat`（逐轮数据）。缺 `ui-chat` 时降级为整会话总量估算；缺 `dsh-token-meter` 时不显示（拿不到会话总量）。
 - Host 半的 `webServer` 是可选依赖；没有它时只用内置基线。
-- 已在 DSH `0.2.0-rc.2` / profile `web` 上验证。
+- 已在 DSH `0.2.0-rc.2` / profile `desktop`（Desktop 端运行的 Web 表面）上验证。
 
 ## 更新价格
 
@@ -112,3 +114,9 @@ node --test tests/pricing.test.js tests/client.test.js
 - `tests/pricing.test.js`：用 `tests/fixture-pricing.html`（官方页面的逐字节副本）验证解析器，含失败关闭用例。
 - `tests/client.test.js`：桩化 `window.__ModuleLoader__` 与 `require`，直接测 `client.js` 暴露的纯函数（时段判定、分桶计价、别名、载荷校验、逐轮读取、精确/估算判定、金额格式化），不渲染 React。
 - `tests/debug-dump.mjs`：排查官网改版时打印投影后的表格结构。
+
+## 许可
+
+本项目以 **MIT** 许可发布，见 [LICENSE](LICENSE)。
+
+测试夹具 `tests/fixture-pricing.html` 是 [DeepSeek API 文档 · 模型 & 价格](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/) 页面的逐字副本，其版权归 DeepSeek, Inc. 所有，仅用于解析器回归测试，**不适用本项目 MIT 许可**。该文件仅存在于源码仓库，不包含在安装包中（`package.json` 的 `files` 未列入 `tests/`）。

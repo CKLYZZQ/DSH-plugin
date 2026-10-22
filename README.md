@@ -1,6 +1,36 @@
-# @local/dsh-billing — 会话账单
+# 会话账单 · dsh-billing-capsule
 
-在 DSH Web GUI 输入框底栏（`conversation.composer.dock`）的「会话统计 / token 用量 / 上下文」旁，加一个显示**当前会话花费**的胶囊。点击展开四类 token 分桶明细与逐轮明细。
+**装完输入框底栏会多一个「账单」胶囊：实时显示当前会话按 DeepSeek 官方价目表（高峰 / 空闲双档）折算的人民币花费；点开可看四类 token 分桶与逐轮明细——不用再去平台后台对账。**
+
+它在 DSH Web GUI 输入框底栏（`conversation.composer.dock`）的「会话统计 / token 用量 / 上下文」旁新增第 4 个项目，**不改动任何内置插件**。
+
+> 能力分类：**界面与体验** ｜ 许可：**MIT** ｜ 价格：**免费**
+
+## 安装
+
+### 从 npm 安装（推荐）
+
+```bash
+dsh plugin --profile web add dsh-billing-capsule
+```
+
+Desktop 端：
+
+```bash
+dsh plugin --profile desktop add dsh-billing-capsule
+```
+
+### 从源码安装（不经过 npm）
+
+```bash
+dsh plugin --profile web add github:CKLYZZQ/DSH-plugin-Billing-Capsule
+```
+
+### 在界面里安装
+
+侧栏 **Plugins（插件）** 页 → 安装 → 填 `dsh-billing-capsule`；或让 agent 用 `plugin_manager` 的 `install_bundle`，`target` 传包名、仓库地址或 tarball 绝对路径。
+
+装完刷新页面，胶囊出现在「会话统计 / token 用量 / 上下文」右侧。卸载：Plugins 页取消选择，或 `plugin_manager` 的 `remove_bundle`。
 
 ## 它显示什么
 
@@ -17,6 +47,8 @@
 官方表未列**缓存写入**单价，该桶按 0 计价（弹层中有说明）。
 
 中国法定节假日未内置；如需精确，把日期加进 `cordis.patch.yml` 的 `holidays` 列表（`YYYY-MM-DD`），这些日期会按空闲计价。
+
+> 金额为**估算参考**，用于随时判断花费量级，不是计费凭证。
 
 ## 精确性
 
@@ -35,7 +67,15 @@
 2. Host 半在插件激活时、以及每 `refreshHours` 小时，抓取官方价格页并解析，经同源路由 `GET /dsh-billing/prices.json` 提供给客户端；客户端每 6 小时拉取一次，拿到就覆盖基线；
 3. `cordis.patch.yml` 里 `config.models` 的**手动覆盖**优先级最高。
 
-抓取或解析失败不会影响使用：弹层会显示当前用的是哪一来源。新增模型或官网改版导致解析失败时，按下面的「更新价格」处理。
+抓取或解析失败不会影响使用：弹层会显示当前用的是哪一来源。官方改版导致解析失败时，按下面的「更新价格」处理。
+
+## 权限与外部服务
+
+- **唯一的对外网络请求**：Host 半抓取 `https://api-docs.deepseek.com/zh-cn/quick_start/pricing/`（官方价格页），默认每 12 小时一次，可用 `refreshHours` 调整或关闭。除此之外不发起任何外部请求。
+- **提供的本地接口**：`GET /dsh-billing/prices.json`（价格表）与 `POST /dsh-billing/refresh`（立即重抓），注册在 Harness 自身的 Web 服务上；默认 `loopbackOnly: true`，只回应 `127.0.0.1` / `::1`，只读价格数据，不返回会话内容。
+- **不读取凭据**：不访问 API key、账号 token、cookie 或任何凭据存储。
+- **无遥测、不上传**：没有任何回传代码；会话数据只在本机浏览器内读取与计算。
+- **客户端只读**：只读 Harness 已有的 `tokenUsage`、`modelSelection` 投影与当前对话的逐轮用量，不写入任何会话事件。
 
 ## 配置（`cordis.patch.yml` 的 `config`）
 
@@ -58,36 +98,48 @@
             output: { peak: 3, idle: 3 }
 ```
 
-## 仓库
+## 真实输出
 
-| 项 | 值 |
-|---|---|
-| 地址 | https://github.com/CKLYZZQ/DSH-plugin |
-| 可见性 | **公开** |
-| 许可 | MIT（见 [LICENSE](LICENSE)） |
-| 默认分支 | `main` |
-| git spec | `git+https://github.com/CKLYZZQ/DSH-plugin.git` |
+### 单元测试
 
-**仓库根即包根**：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`pricing.js` 都在根目录，所以这个仓库本身可以直接当 git spec 安装。
+```text
+ℹ tests 19
+ℹ pass 19
+ℹ fail 0
+```
 
-> 仓库公开，任何机器都能直接克隆安装，**不需要 GitHub 凭据**。
-> 注意公开是**单向门**：即使之后改回私有，已产生的 fork、GitHub 缓存与搜索引擎索引也不会消失。
+### 官方价目表解析结果（`GET /dsh-billing/prices.json` 节选）
 
-## 安装
+```json
+{
+  "ok": true,
+  "currency": "CNY",
+  "unit": 1000000,
+  "models": {
+    "deepseek-flash": {
+      "cacheHitInput": { "peak": 0.04, "idle": 0.02 },
+      "cacheMissInput": { "peak": 2, "idle": 1 },
+      "output": { "peak": 8, "idle": 4 }
+    },
+    "deepseek-v4-pro": {
+      "cacheHitInput": { "peak": 0.3, "idle": 0.15 },
+      "cacheMissInput": { "peak": 9, "idle": 4.5 },
+      "output": { "peak": 27, "idle": 13.5 }
+    }
+  }
+}
+```
 
-四种方式都走 Harness 的插件管理器（侧栏 Plugins 页，或 agent 的 `plugin_manager` 工具，`target` 传对应 spec）：
+### 座位注册（Harness Inspect 实测）
 
-| 方式 | 做法 |
-|---|---|
-| **git 仓库** | `target` 传 `git+https://github.com/CKLYZZQ/DSH-plugin.git`（公开仓库，无需凭据） |
-| tarball（离线跨机） | `pnpm pack` / `npm pack` 得到 `.tgz`，`target` 传 tarball 绝对路径 |
-| 本地目录 | 把 `dsh-billing` 整个目录拷到目标机器，`install_bundle` 的 `target` 传该机**绝对路径**（装出来是 `link:`，源目录不可删/移） |
-| npm / 私有 registry | 去掉 `package.json` 的 `private` 后发布，`target` 传包名（可用 `registry` 指定源） |
+```json
+"occupants": [
+  { "id": "stats",   "order": 0, "active": true },
+  { "id": "billing", "order": 1, "active": true }
+]
+```
 
-安装默认启用该 bundle，profile 级生效、跨会话、重启后保留。
-新装 bundle 通常经 HMR 即时生效；**替换已安装包需要重启**以加载新的 JS 模块代。
-
-卸载：侧栏 Plugins 页取消选择，或 `plugin_manager` 的 `remove_bundle`。
+> 截图待补。需要真实界面截图时，替换本节或追加图片即可。
 
 ## 依赖与兼容
 
@@ -114,6 +166,21 @@ node --test tests/pricing.test.js tests/client.test.js
 - `tests/pricing.test.js`：用 `tests/fixture-pricing.html`（官方页面的逐字节副本）验证解析器，含失败关闭用例。
 - `tests/client.test.js`：桩化 `window.__ModuleLoader__` 与 `require`，直接测 `client.js` 暴露的纯函数（时段判定、分桶计价、别名、载荷校验、逐轮读取、精确/估算判定、金额格式化），不渲染 React。
 - `tests/debug-dump.mjs`：排查官网改版时打印投影后的表格结构。
+
+## 仓库
+
+| 项 | 值 |
+|---|---|
+| 地址 | https://github.com/CKLYZZQ/DSH-plugin-Billing-Capsule |
+| 可见性 | **公开** |
+| 许可 | MIT（见 [LICENSE](LICENSE)） |
+| 默认分支 | `main` |
+| npm | https://www.npmjs.com/package/dsh-billing-capsule |
+| git spec | `git+https://github.com/CKLYZZQ/DSH-plugin-Billing-Capsule.git` |
+
+**仓库根即包根**：`package.json`、`cordis.patch.yml`、`index.js`、`client.js`、`pricing.js` 都在根目录，所以这个仓库本身可以直接当 git spec 安装。
+
+> 仓库公开，任何机器都能直接克隆安装，**不需要 GitHub 凭据**。公开是**单向门**：即使之后改回私有，已产生的 fork、GitHub 缓存与搜索引擎索引也不会消失。
 
 ## 许可
 

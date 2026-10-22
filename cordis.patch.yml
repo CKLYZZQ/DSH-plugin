@@ -1,4 +1,4 @@
-# dsh-billing — profile patch layer.
+# dsh-billing-capsule — profile patch layer.
 #
 # Every key below is optional and read by the plugin's own Host half at
 # activation (the plugin declares no Config schema, so nothing is validated
@@ -18,7 +18,7 @@
 #                    fetched table and the client's bundled baseline.
 - insert:
     - id: billing
-      name: '@local/dsh-billing'
+      name: 'dsh-billing-capsule'
       config:
         priceSourceUrl: 'https://api-docs.deepseek.com/zh-cn/quick_start/pricing/'
         refreshHours: 12

@@ -1,18 +1,27 @@
 {
-  "name": "@local/dsh-billing",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Session billing pill: shows what the current session cost, using official per-model prices.",
+  "name": "dsh-billing-capsule",
+  "version": "0.2.0",
+  "description": "Session billing pill for DeepSeek Harness: shows what the current session cost, priced with the official per-model peak/idle rates.",
   "license": "MIT",
   "author": "Ricardo (https://github.com/CKLYZZQ)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CKLYZZQ/DSH-plugin.git"
+    "url": "git+https://github.com/CKLYZZQ/DSH-plugin-Billing-Capsule.git"
   },
-  "homepage": "https://github.com/CKLYZZQ/DSH-plugin#readme",
+  "homepage": "https://github.com/CKLYZZQ/DSH-plugin-Billing-Capsule#readme",
   "bugs": {
-    "url": "https://github.com/CKLYZZQ/DSH-plugin/issues"
+    "url": "https://github.com/CKLYZZQ/DSH-plugin-Billing-Capsule/issues"
   },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "billing",
+    "cost",
+    "token",
+    "usage",
+    "pricing"
+  ],
   "type": "module",
   "exports": {
     ".": "./index.js",

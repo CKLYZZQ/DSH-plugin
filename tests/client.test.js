@@ -140,6 +140,7 @@ test('an exact session prices every loaded turn by its own route', () => {
   assert.equal(summary.rateKind, 'peak');
   assert.equal(summary.rows.length, 1);
   assert.equal(summary.rows[0].cost, 2);
+  assert.equal(summary.rows[0].model, 'deepseek-flash');
 });
 
 test('a partially loaded session falls back to the whole-log total and is marked approximate', () => {
@@ -211,4 +212,12 @@ test('money formatting keeps a sub-cent amount honest', () => {
   assert.equal(B.money(0.001, 2), '<¥0.01');
   assert.equal(B.money(1.239, 2), '¥1.24');
   assert.equal(B.money(0.0123, 4), '¥0.0123');
+});
+
+test('timestamps render as local MM-DD HH:mm, not raw ISO', () => {
+  const rendered = B.formatWhen('2026-10-22T06:48:37.262Z');
+  assert.match(rendered, /^\d{2}-\d{2} \d{2}:\d{2}$/, rendered);
+  assert.equal(B.formatWhen(''), '');
+  assert.equal(B.formatWhen(undefined), '');
+  assert.equal(B.formatWhen('not-a-date'), 'not-a-date');
 });

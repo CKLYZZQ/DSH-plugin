@@ -1,6 +1,6 @@
 {
   "name": "dsh-billing-capsule",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Session billing pill for DeepSeek Harness: shows what the current session cost, priced with the official per-model peak/idle rates.",
   "license": "MIT",
   "author": "Ricardo (https://github.com/CKLYZZQ)",

@@ -288,6 +288,21 @@ window.__ModuleLoader__.load({
     }
 
     /**
+     * Render an ISO timestamp as local `MM-DD HH:mm`.
+     *
+     * The Host half reports when it last parsed the official page; an ISO string
+     * with seconds and a `Z` is noise in a dialog that only needs the minute.
+     */
+    function formatWhen(iso) {
+      if (typeof iso !== 'string' || iso === '') return '';
+      const ms = Date.parse(iso);
+      if (!Number.isFinite(ms)) return iso;
+      const at = new Date(ms);
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(at.getMonth() + 1)}-${pad(at.getDate())} ${pad(at.getHours())}:${pad(at.getMinutes())}`;
+    }
+
+    /**
      * Fold the session's usage into the numbers the pill and dialog show.
      * @returns a summary object; `hasUsage === false` means render nothing.
      */
@@ -330,6 +345,7 @@ window.__ModuleLoader__.load({
             buckets,
             kind,
             route: routeLabel(effective),
+            model: effective === null ? null : effective.model,
             cost,
           });
         }
@@ -478,7 +494,7 @@ window.__ModuleLoader__.load({
 .dshb_pill:focus-visible{outline:var(--dsw-focus-ring-width,2px) solid var(--dsw-focus-ring-color,var(--dsw-alias-brand-primary));outline-offset:1px;}
 .dshb_label{min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .dshb_approx{color:var(--dsw-alias-state-warn-primary);}
-.dshb_panel{position:fixed;z-index:70;box-sizing:border-box;max-height:min(62vh,460px);overflow-y:auto;padding:10px 12px;border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-lg,12px);background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 8px 32px rgba(0,0,0,.18);font-size:12px;line-height:18px;}
+.dshb_panel{position:fixed;z-index:70;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;padding:10px 12px 12px;border:1px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-lg,12px);background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 8px 32px rgba(0,0,0,.18);font-size:12px;line-height:18px;}
 .dshb_head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
 .dshb_title{font-size:13px;font-weight:500;}
 .dshb_total{font-variant-numeric:tabular-nums;}
@@ -491,9 +507,14 @@ window.__ModuleLoader__.load({
 .dshb_note{color:var(--dsw-alias-label-secondary);font-size:11px;line-height:16px;margin:6px 0 0;}
 .dshb_note p{margin:0 0 2px;word-break:break-word;}
 .dshb_sectionTitle{margin:10px 0 4px;color:var(--dsw-alias-label-secondary);font-size:11px;}
-.dshb_turns{list-style:none;margin:0;padding:0;max-height:200px;overflow-y:auto;}
-.dshb_turn{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:1px 0;font-variant-numeric:tabular-nums;}
-.dshb_turnMeta{min-width:0;color:var(--dsw-alias-label-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dshb_turns{list-style:none;margin:0;padding:0;}
+.dshb_turn{display:flex;flex-direction:column;gap:1px;padding:3px 0;font-variant-numeric:tabular-nums;}
+.dshb_turn + .dshb_turn{border-top:1px solid var(--dsw-alias-border-l1);}
+.dshb_turnTop{display:flex;align-items:baseline;gap:8px;}
+.dshb_turnNo{flex:none;color:var(--dsw-alias-label-secondary);}
+.dshb_turnModel{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dshb_turnCost{flex:none;font-variant-numeric:tabular-nums;}
+.dshb_turnMeta{color:var(--dsw-alias-label-secondary);font-size:11px;line-height:15px;font-variant-numeric:tabular-nums;}
 `;
 
     // --------------------------------------------------------------------- //
@@ -541,7 +562,11 @@ window.__ModuleLoader__.load({
           const rect = anchor.getBoundingClientRect();
           const width = Math.min(340, Math.max(240, window.innerWidth - 24));
           const left = Math.min(Math.max(12, rect.left), Math.max(12, window.innerWidth - width - 12));
-          setPos({ left, width, bottom: Math.max(12, window.innerHeight - rect.top + 8) });
+          const bottom = Math.max(12, window.innerHeight - rect.top + 8);
+          // Cap the panel to the space actually available above the trigger, so
+          // the last row is never cut off by the viewport edge.
+          const maxHeight = Math.max(200, Math.min(460, window.innerHeight - bottom - 12));
+          setPos({ left, width, bottom, maxHeight });
         };
         place();
         const focusTrigger = () => {
@@ -635,7 +660,7 @@ window.__ModuleLoader__.load({
     function BillingDialog(props) {
       const { t, summary, dialog, fetched } = props;
       const style = dialog.pos === null
-        ? { left: 12, width: 340, bottom: 12 }
+        ? { left: 12, width: 340, bottom: 12, maxHeight: 460 }
         : dialog.pos;
       const children = [];
 
@@ -664,7 +689,7 @@ window.__ModuleLoader__.load({
       if (fetched === null) {
         notes.push(t('dialog.source.baseline', { date: BASELINE.date }));
       } else {
-        const when = fetched.fetchedAt === null ? fetched.source ?? '' : fetched.fetchedAt;
+        const when = fetched.fetchedAt === null ? fetched.source ?? '' : formatWhen(fetched.fetchedAt);
         notes.push(t('dialog.source.auto', { time: when }));
         if (fetched.note !== null) notes.push(fetched.note);
       }
@@ -687,15 +712,23 @@ window.__ModuleLoader__.load({
           key: `turn-${row.turn}`,
           className: 'dshb_turn',
         }, [
-          h('span', { key: 'l', className: 'dshb_turnMeta' }, t('dialog.turnRow', { turn: row.turn })),
-          h('span', { key: 'm', className: 'dshb_turnMeta' }, [
-            formatTokens(totalTokens(row.buckets)),
-            ' tok · ',
-            row.route === null ? t('dialog.modelUnknown') : row.route,
+          h('div', { key: 'top', className: 'dshb_turnTop' }, [
+            h('span', { key: 'no', className: 'dshb_turnNo' }, t('dialog.turnRow', { turn: row.turn })),
+            h('span', {
+              key: 'model',
+              className: 'dshb_turnModel',
+              title: row.route === null ? undefined : row.route,
+            }, row.model === null ? t('dialog.modelUnknown') : row.model),
+            h('span', {
+              key: 'cost',
+              className: row.cost === null ? 'dshb_turnCost dshb_approx' : 'dshb_turnCost',
+            }, row.cost === null ? '--' : money(row.cost, 4)),
+          ]),
+          h('div', { key: 'meta', className: 'dshb_turnMeta' }, [
+            `${formatTokens(totalTokens(row.buckets))} tok`,
             ' · ',
             t(row.kind === 'peak' ? 'dialog.window.peak' : 'dialog.window.idle'),
           ]),
-          h('span', { key: 'v', className: row.cost === null ? 'dshb_approx' : '' }, row.cost === null ? '--' : money(row.cost, 4)),
         ]))));
       }
 
@@ -812,6 +845,7 @@ window.__ModuleLoader__.load({
         selectedRoute,
         summarize,
         money,
+        formatWhen,
       },
     };
   },

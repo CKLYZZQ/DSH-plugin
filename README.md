@@ -134,8 +134,9 @@ dsh plugin --profile web add github:CKLYZZQ/DSH-plugin-Billing-Capsule
 
 ```json
 "occupants": [
-  { "id": "stats",   "order": 0, "active": true },
-  { "id": "billing", "order": 1, "active": true }
+  { "id": "activity", "order": 0, "active": true },
+  { "id": "usage",    "order": 1, "active": true },
+  { "id": "billing",  "order": 2, "active": true }
 ]
 ```
 
@@ -146,7 +147,7 @@ dsh plugin --profile web add github:CKLYZZQ/DSH-plugin-Billing-Capsule
 - 零 `dependencies`、零 `peerDependencies`、零 install script：不 import 任何 `@deepseek-ai/*`，因此不会触发 peer 版本拒绝，也不会产生待批准的构建脚本。
 - `dsh.client.inject` 只声明激活顺序：目标 profile 需组合 `ui-conversation`（座位与底栏）与 `ui-chat`（逐轮数据）。缺 `ui-chat` 时降级为整会话总量估算；缺 `dsh-token-meter` 时不显示（拿不到会话总量）。
 - Host 半的 `webServer` 是可选依赖；没有它时只用内置基线。
-- 已在 DSH `0.2.0-rc.2` / profile `desktop`（Desktop 端运行的 Web 表面）上验证。
+- 已在 DSH `0.2.0-rc.2` 与 `0.2.1-rc.2` / profile `desktop`（Desktop 端运行的 Web 表面）上验证座位注册与价格路由。
 
 ## 更新价格
 

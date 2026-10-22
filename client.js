@@ -788,7 +788,7 @@ window.__ModuleLoader__.load({
       ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({
         name: 'conversation.composer.dock',
         id: 'billing',
-        order: 1,
+        order: 2,
         locale: NS,
       }, BillingPill));
     }

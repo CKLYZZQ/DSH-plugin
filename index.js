@@ -13,7 +13,7 @@
  * half then prices against its own bundled baseline, which was taken from the
  * official page and is labelled with its source and date.
  *
- * @module @local/dsh-billing
+ * @module dsh-billing-capsule
  */
 
 import { DEFAULT_CONFIG, parsePricingTable, stripHtml } from './pricing.js';

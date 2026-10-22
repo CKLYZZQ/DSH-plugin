@@ -17,7 +17,7 @@
  *   - A model outside the price table is never given an invented number.
  */
 window.__ModuleLoader__.load({
-  id: '@local/dsh-billing',
+  id: 'dsh-billing-capsule',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
@@ -773,11 +773,11 @@ window.__ModuleLoader__.load({
       ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-billing: dictionaries');
       ctx.effect(() => {
         if (typeof document === 'undefined') return () => {};
-        const marker = '@local/dsh-billing/client.css';
+        const marker = 'dsh-billing-capsule/client.css';
         const existing = document.querySelector(`style[data-plugin-css="${marker}"]`);
         if (existing !== null) return () => {};
         const tag = document.createElement('style');
-        tag.dataset.plugin = '@local/dsh-billing';
+        tag.dataset.plugin = 'dsh-billing-capsule';
         tag.dataset.pluginCss = marker;
         tag.textContent = CSS;
         document.head.appendChild(tag);

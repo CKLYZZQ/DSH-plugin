@@ -12,7 +12,7 @@
  * classified by its label, which keeps unrelated rows such as `输出长度` from
  * being mistaken for the output price row.
  *
- * @module @local/dsh-billing/pricing
+ * @module dsh-billing-capsule/pricing
  */
 
 /** Host defaults; the `config` block of `cordis.patch.yml` overrides any key. */

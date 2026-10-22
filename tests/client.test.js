@@ -8,7 +8,10 @@
  * component is rendered and no DOM is emulated.
  */
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
+
+const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 let captured = null;
 globalThis.window = {
@@ -49,6 +52,12 @@ const SUNDAY = new Date('2026-10-11T10:00:00+08:00').getTime();
 function turn(number, at, usage) {
   return [number, { turn: number, start: { time: at }, data: new Map([['turn-tail', { tokenUsage: usage }]]) }];
 }
+
+test('the client module id equals the package name (the loader requires it)', () => {
+  // A renamed package whose bundle keeps the old id never loads: the Host half
+  // activates while the dock entry silently never registers.
+  assert.equal(captured.id, manifest.name);
+});
 
 test('the factory exposes the plugin contract and a test-only surface', () => {
   assert.deepEqual(plugin.inject, ['slots', 'locale']);

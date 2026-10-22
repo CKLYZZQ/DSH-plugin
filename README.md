@@ -6,6 +6,12 @@
 
 > 能力分类：**界面与体验** ｜ 许可：**MIT** ｜ 价格：**免费**
 
+## 截图
+
+![会话账单：底栏胶囊与逐轮明细弹层](https://raw.githubusercontent.com/CKLYZZQ/DSH-plugin-Billing-Capsule/main/docs/screenshot.png)
+
+底栏右侧的 `≈¥5.53 · 账单` 就是本插件；展开后可见四类 token 分桶（含该时段单价与小计）、计价模型、单价来源，以及逐轮明细。`≈` 表示该会话历史未全部加载，因此按整会话总量与当前模型估算。
+
 ## 安装
 
 ### 从 npm 安装（推荐）
@@ -139,8 +145,6 @@ dsh plugin --profile web add github:CKLYZZQ/DSH-plugin-Billing-Capsule
   { "id": "billing",  "order": 2, "active": true }
 ]
 ```
-
-> 截图待补。需要真实界面截图时，替换本节或追加图片即可。
 
 ## 依赖与兼容
 

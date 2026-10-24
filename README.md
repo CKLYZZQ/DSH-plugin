@@ -192,3 +192,4 @@ node --test tests/pricing.test.js tests/client.test.js
 本项目以 **MIT** 许可发布，见 [LICENSE](LICENSE)。
 
 测试夹具 `tests/fixture-pricing.html` 是 [DeepSeek API 文档 · 模型 & 价格](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/) 页面的逐字副本，其版权归 DeepSeek, Inc. 所有，仅用于解析器回归测试，**不适用本项目 MIT 许可**。该文件仅存在于源码仓库，不包含在安装包中（`package.json` 的 `files` 未列入 `tests/`）。
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/cklyzzq/dsh-plugin-billing-capsule)
